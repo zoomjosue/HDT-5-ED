@@ -1,3 +1,4 @@
+import numpy as np
 import simpy
 import random
 
@@ -44,3 +45,6 @@ def ejecutar_simulacion(procesos, intervalo, memoria, cpus, velocidadkuchao):
     
     env.process(generar_procesos())
     env.run()
+
+    tiempos_finales = [env.now - t.value for t in tiempos]
+    return np.mean(tiempos_finales), np.std(tiempos_finales)
