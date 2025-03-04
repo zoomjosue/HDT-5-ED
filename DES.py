@@ -30,3 +30,17 @@ def proceso (env, RAM, CPU):
     
     tiempo_total = env.now - tiempo_inicio
     return tiempo_total
+
+def ejecutar_simulacion(procesos, intervalo, memoria, cpus, velocidadkuchao):
+    env = simpy.Environment()
+    RAM = simpy.Container(env, init=memoria, capacity=memoria)
+    CPU = simpy.Resource(env, capacity=cpus)
+    tiempos = []
+
+    def generar_procesos():
+        for i in range(procesos):
+            tiempos.append(env.process(proceso(env, RAM, CPU, velocidadkuchao, i+1)))
+            yield env.timeout(random.expovariate(1.0/intervalo))
+    
+    env.process(generar_procesos())
+    env.run()
