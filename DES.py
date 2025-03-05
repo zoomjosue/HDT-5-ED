@@ -6,10 +6,9 @@ SEMILLA = 10
 random.seed(SEMILLA)
 MEMORIA = 100
 VELOCIDAD_DE_INSTRUCCIONES = 3
-PROCESOS = [25, 50, 100, 150, 200]
-INTERVALOS_DE_LLEGADA = [10, 5, 1]
 
-def proceso (env, RAM, CPU):
+
+def proceso (env, RAM, CPU,tiempo_total):
     memoria = random.randint(1, 10)
     instrucciones = random.randint(1, 10)
     tiempo_inicio = env.now
@@ -20,19 +19,18 @@ def proceso (env, RAM, CPU):
         with CPU.request() as req:
             yield req
             yield env.timeout(1)
-            instrucciones -= VELOCIDAD_DE_INSTRUCCIONES
-
+            instrucciones -= min(VELOCIDAD_DE_INSTRUCCIONES, instrucciones)
+            
             if instrucciones == 0:
                 break
-            elif random.randint(1, 21) == 1:
+            elif random.randint(1, 2) == 1:
                 yield env.timeout(1)
 
     yield RAM.put(memoria)
     
-    tiempo_total = env.now - tiempo_inicio
-    return tiempo_total
+    tiempo_total.append(env.now - tiempo_inicio)
 
-def ejecutar_simulacion(procesos, intervalo, memoria, cpus, velocidadkuchao):
+def ejecutar_simulacion(procesos, intervalo, memoria, cpus, velocidad_instrucciones):
     env = simpy.Environment()
     RAM = simpy.Container(env, init=memoria, capacity=memoria)
     CPU = simpy.Resource(env, capacity=cpus)
@@ -40,11 +38,10 @@ def ejecutar_simulacion(procesos, intervalo, memoria, cpus, velocidadkuchao):
 
     def generar_procesos():
         for i in range(procesos):
-            tiempos.append(env.process(proceso(env, RAM, CPU, velocidadkuchao, i+1)))
+            env.process(proceso(env, RAM, CPU, tiempos))
             yield env.timeout(random.expovariate(1.0/intervalo))
     
     env.process(generar_procesos())
     env.run()
 
-    tiempos_finales = [env.now - t.value for t in tiempos]
-    return np.mean(tiempos_finales), np.std(tiempos_finales)
+    return np.mean(tiempos), np.std(tiempos)
