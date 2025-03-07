@@ -2,12 +2,17 @@ import numpy as np
 import simpy
 import random
 
+#Se establece la configuracion de la simulacion
 SEMILLA = 10
 random.seed(SEMILLA)
 MEMORIA = 100
 VELOCIDAD_DE_INSTRUCCIONES = 3
 
-
+#Esta funcion representa un proceso que requiere memoria y CPU para ejecutarse
+#env: entorno de simulacion de SimPy
+#RAM: contenedor que simula la memoria RAM disponible
+#CPU: recurso que representa el procesador
+#tiempo_total: lista donde se almacenan los tiempos de ejecución de los procesos
 def proceso (env, RAM, CPU,tiempo_total):
     memoria = random.randint(1, 10)
     instrucciones = random.randint(1, 10)
@@ -30,6 +35,13 @@ def proceso (env, RAM, CPU,tiempo_total):
     
     tiempo_total.append(env.now - tiempo_inicio)
 
+#Esta funcion se encarga de ejecutar la simulacion de procesos en un etorno SimPy
+#procesos: número total de procesos a simular
+#intervalo: tiempo promedio de llegada de nuevos procesos (exponencial)
+#memoria: capacidad total de la memoria RAM
+#cpus: cantidad de unidades de procesamiento disponibles
+#velocidad_instrucciones: cantidad de instrucciones que se procesan por unidad de tiempo
+#retorna la media y la desviacion estandar de los tiempos de ejecucion
 def ejecutar_simulacion(procesos, intervalo, memoria, cpus, velocidad_instrucciones):
     env = simpy.Environment()
     RAM = simpy.Container(env, init=memoria, capacity=memoria)
